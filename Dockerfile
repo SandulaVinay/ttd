@@ -1,8 +1,8 @@
-# Step 1: Vendor Stage using official Composer image
+# Step 1: Vendor Stage using official Composer 2 image
 FROM composer:2 as vendor
 WORKDIR /app
-COPY composer.json composer.lock ./
-RUN composer install \
+COPY composer.json composer.lock* ./
+RUN composer update \
     --no-dev \
     --no-scripts \
     --no-autoloader \
