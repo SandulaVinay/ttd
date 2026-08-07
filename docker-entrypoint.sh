@@ -22,7 +22,10 @@ mkdir -p /var/www/storage/framework/sessions
 mkdir -p /var/www/storage/framework/views
 mkdir -p /var/www/storage/logs
 
-# Set full permissions for storage and bootstrap cache
+# Generate autoloader at container boot
+composer dump-autoload --optimize --no-dev --ignore-platform-reqs || true
+
+# Set full permissions for storage, bootstrap cache, and database
 chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
 
 # Storage link

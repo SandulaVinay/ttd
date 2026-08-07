@@ -27,17 +27,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy composer manifest files first for Docker layer caching
-COPY composer.json composer.lock ./
-
-# Install Composer packages without running scripts (prevents premature boot errors)
-RUN composer install --no-interaction --no-scripts --prefer-dist --ignore-platform-reqs
-
 # Copy full application codebase
 COPY . /var/www
 
-# Generate optimized autoloader & build frontend Vite assets
-RUN composer dump-autoload --optimize --ignore-platform-reqs
+# Install Composer packages with ultra-low memory footprint (--no-dev --no-audit --no-autoloader)
+RUN composer install --no-dev --no-audit --no-autoloader --no-scripts --prefer-dist --ignore-platform-reqs --no-interaction
+
+# Build frontend Vite assets
 RUN npm install && npm run build
 
 # Make entrypoint script executable & set directory permissions
