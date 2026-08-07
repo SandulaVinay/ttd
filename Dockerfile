@@ -11,8 +11,8 @@ RUN composer update \
     --prefer-dist \
     --no-interaction
 
-# Step 2: Final Production Stage
-FROM php:8.3-cli
+# Step 2: Final Production Stage (PHP 8.4 for Laravel 13 compatibility)
+FROM php:8.4-cli
 
 ENV PORT=10000
 
