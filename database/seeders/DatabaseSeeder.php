@@ -18,11 +18,22 @@ class DatabaseSeeder extends Seeder
             SevaTypeSeeder::class,
         ]);
 
-        $user = User::firstOrCreate(
+        // Main Admin User requested by user
+        $vinayUser = User::updateOrCreate(
+            ['email' => 'sandulavinay@gmail.com'],
+            [
+                'name' => 'Vinay Sandula',
+                'password' => Hash::make('Python#1989'),
+                'status' => 'active',
+            ]
+        );
+
+        // Garuda Admin User
+        $garudaUser = User::updateOrCreate(
             ['email' => 'garuda008@gmail.com'],
             [
                 'name' => 'garuda booking',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Python#1989'),
                 'status' => 'active',
             ]
         );

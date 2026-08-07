@@ -13,10 +13,12 @@ class RoleSeeder extends Seeder
         $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
         $operator = Role::firstOrCreate(['name' => 'Operator']);
 
-        // Assign Super Admin to the first registered user
-        $user = User::first();
-        if ($user) {
-            $user->assignRole($superAdmin);
+        // Assign Super Admin role to all seeded admin users
+        $users = User::all();
+        foreach ($users as $user) {
+            if (!$user->hasRole('Super Admin')) {
+                $user->assignRole($superAdmin);
+            }
         }
     }
 }
