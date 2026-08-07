@@ -22,6 +22,13 @@ mkdir -p /var/www/storage/framework/sessions
 mkdir -p /var/www/storage/framework/views
 mkdir -p /var/www/storage/logs
 
+# Generate APP_KEY if missing or empty
+if [ -z "$APP_KEY" ]; then
+    if ! grep -q "^APP_KEY=base64" /var/www/.env; then
+        php artisan key:generate --force || true
+    fi
+fi
+
 # Generate autoloader at container boot
 composer dump-autoload --optimize --no-dev --ignore-platform-reqs || true
 
