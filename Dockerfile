@@ -29,7 +29,7 @@ WORKDIR /var/www
 COPY . /var/www
 
 # Install Composer dependencies & build frontend assets
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader --no-interaction --ignore-platform-reqs
 RUN npm install && npm run build
 
 # Storage permissions
