@@ -10,7 +10,7 @@ if [ ! -f /var/www/.env ]; then
     fi
 fi
 
-# Ensure database directory and sqlite file exist if sqlite is used
+# Ensure database directory and sqlite file exist
 mkdir -p /var/www/database
 if [ ! -f /var/www/database/database.sqlite ]; then
     touch /var/www/database/database.sqlite
@@ -31,12 +31,17 @@ chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
 # Storage link
 php artisan storage:link --force || true
 
-# Clear previous configuration caches
+# Clear configuration cache
 php artisan config:clear || true
-php artisan cache:clear || true
 
-# Run migrations if database is available
+# 1. Run migrations FIRST to create database tables (cache, sessions, users, etc.)
 php artisan migrate --force || true
+
+# 2. Seed database if tables were just created
+php artisan db:seed --force || true
+
+# 3. Clear cache AFTER database tables exist
+php artisan cache:clear || true
 
 # Start Laravel server
 exec php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
