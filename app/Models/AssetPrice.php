@@ -12,4 +12,10 @@ class AssetPrice extends Model
         'change_24h',
         'last_updated_at',
     ];
+
+    protected $casts = [
+        'current_price_inr' => 'float',
+        'change_24h' => 'float',
+        'last_updated_at' => 'datetime',
+    ];
 }

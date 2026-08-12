@@ -62,7 +62,7 @@ class PortfolioService
                 'pnl' => (float)$pnl,
                 'pnl_percentage' => (float)$pnlPercentage,
                 'change_24h' => (float)$change24h,
-                'last_updated' => $lastUpdated ? $lastUpdated->diffForHumans() : 'N/A',
+                'last_updated' => $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->diffForHumans() : 'N/A',
             ];
         });
 
