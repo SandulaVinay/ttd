@@ -241,9 +241,12 @@ class InvestmentController extends Controller
             'available_cash' => 'required|numeric|min:0',
         ]);
 
+        $totalExpenses = CompanyExpense::sum('amount');
+        $baseCash = $validated['available_cash'] + $totalExpenses;
+
         FundBalance::updateOrCreate(
             ['id' => 1],
-            ['available_cash' => $validated['available_cash']]
+            ['available_cash' => $baseCash]
         );
 
         return redirect()->route('investments.index')->with('success', 'Available cash fund updated successfully!');

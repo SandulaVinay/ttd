@@ -66,8 +66,12 @@ class PortfolioService
             ];
         });
 
+        $totalExpenses = CompanyExpense::sum('amount');
         $fundBalance = FundBalance::first();
-        $availableCash = $fundBalance ? (float)$fundBalance->available_cash : 66557.00;
+        $rawCash = $fundBalance ? (float)$fundBalance->available_cash : 106557.33;
+
+        // Available cash after deducting all company expenses
+        $availableCash = max(0, $rawCash - $totalExpenses);
 
         $totalPortfolioValue = $availableCash + $totalCurrentValue;
         $totalNetPnl = $totalCurrentValue - $totalInvestment;
