@@ -1,14 +1,11 @@
 #!/bin/sh
 set -e
 
-# Create .env if missing
-if [ ! -f /var/www/.env ]; then
-    if [ -f /var/www/.env.example ]; then
-        cp /var/www/.env.example /var/www/.env
-    else
-        touch /var/www/.env
-    fi
+# Always update .env from .env.example if present
+if [ -f /var/www/.env.example ]; then
+    cp -f /var/www/.env.example /var/www/.env
 fi
+
 
 # Ensure database directory and sqlite file exist
 mkdir -p /var/www/database
