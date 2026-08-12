@@ -43,6 +43,8 @@ Route::middleware(['auth', 'role:Super Admin|Operator'])->group(function () {
     Route::put('investments/assets/{id}', [App\Http\Controllers\InvestmentController::class, 'updateAsset'])->name('investments.updateAsset');
     Route::delete('investments/assets/{id}', [App\Http\Controllers\InvestmentController::class, 'destroyAsset'])->name('investments.destroyAsset');
     Route::post('investments/expenses', [App\Http\Controllers\InvestmentController::class, 'storeExpense'])->name('investments.storeExpense');
+    Route::put('investments/expenses/{id}', [App\Http\Controllers\InvestmentController::class, 'updateExpense'])->name('investments.updateExpense');
+    Route::delete('investments/expenses/{id}', [App\Http\Controllers\InvestmentController::class, 'destroyExpense'])->name('investments.destroyExpense');
     Route::post('investments/contributions', [App\Http\Controllers\InvestmentController::class, 'updateContribution'])->name('investments.updateContribution');
     Route::post('investments/cash-fund', [App\Http\Controllers\InvestmentController::class, 'updateCashFund'])->name('investments.updateCashFund');
 

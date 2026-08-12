@@ -116,6 +116,9 @@ class PortfolioService
         $expenses = CompanyExpense::orderBy('expense_date', 'desc')->get();
         $totalExpenses = CompanyExpense::sum('amount');
 
+        $stockHoldingsList = $assets->where('asset_type', 'stock_nse')->map(fn($a) => $a->symbol . ' (' . (float)$a->quantity . ')')->implode(', ');
+        $cryptoHoldingsList = $assets->where('asset_type', 'crypto')->map(fn($a) => $a->symbol . ' (' . (float)$a->quantity . ')')->implode(', ');
+
         return [
             'total_portfolio_value' => $totalPortfolioValue,
             'available_cash' => $availableCash,
@@ -127,6 +130,8 @@ class PortfolioService
             'total_crypto_value' => $totalCryptoValue,
             'total_stock_investment' => $totalStockInvestment,
             'total_crypto_investment' => $totalCryptoInvestment,
+            'stock_holdings_list' => $stockHoldingsList ?: 'None',
+            'crypto_holdings_list' => $cryptoHoldingsList ?: 'None',
             'holdings' => $holdings,
             'investors' => $investorContributions,
             'months' => $months,

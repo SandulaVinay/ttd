@@ -175,6 +175,38 @@ class InvestmentController extends Controller
     }
 
     /**
+     * Update an existing company expense.
+     */
+    public function updateExpense(Request $request, $id)
+    {
+        $expense = CompanyExpense::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'paid_by' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
+        ]);
+
+        $expense->update($validated);
+
+        return redirect()->route('investments.index')->with('success', 'Company expense updated successfully!');
+    }
+
+    /**
+     * Delete a company expense.
+     */
+    public function destroyExpense($id)
+    {
+        $expense = CompanyExpense::findOrFail($id);
+        $expense->delete();
+
+        return redirect()->route('investments.index')->with('success', 'Company expense deleted.');
+    }
+
+    /**
      * Save/Update partner monthly contribution.
      */
     public function updateContribution(Request $request)

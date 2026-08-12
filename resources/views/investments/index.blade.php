@@ -97,7 +97,7 @@
             <div class="p-3 bg-white rounded shadow-sm border d-flex justify-content-between align-items-center">
                 <div>
                     <span class="badge bg-primary text-uppercase me-2"><i class="fas fa-landmark me-1"></i> Indian Stock Market (NSE)</span>
-                    <span class="text-muted small">TATAPOWER, ADANIGREEN, SOUTHBANK</span>
+                    <span class="text-muted small fw-semibold">{{ $summary['stock_holdings_list'] }}</span>
                 </div>
                 <div class="fw-bold text-dark fs-5" id="valStockValue">
                     ₹{{ number_format($summary['total_stock_value'], 2) }}
@@ -108,7 +108,7 @@
             <div class="p-3 bg-white rounded shadow-sm border d-flex justify-content-between align-items-center">
                 <div>
                     <span class="badge bg-warning text-dark text-uppercase me-2"><i class="fab fa-bitcoin me-1"></i> Crypto Assets</span>
-                    <span class="text-muted small">Dogecoin, VeChain, Solana</span>
+                    <span class="text-muted small fw-semibold">{{ $summary['crypto_holdings_list'] }}</span>
                 </div>
                 <div class="fw-bold text-dark fs-5" id="valCryptoValue">
                     ₹{{ number_format($summary['total_crypto_value'], 2) }}
@@ -179,7 +179,7 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark">{{ $asset['symbol'] }}</div>
+                                            <div class="fw-bold text-dark fs-6">{{ $asset['symbol'] }} <span class="badge bg-light text-primary border ms-1">({{ (float)$asset['quantity'] }})</span></div>
                                             <div class="small text-muted">{{ $asset['name'] }}</div>
                                         </div>
                                     </div>
@@ -369,6 +369,7 @@
                                 <th>Category</th>
                                 <th>Paid By</th>
                                 <th class="text-end">Amount</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -379,10 +380,76 @@
                                 <td><span class="badge bg-secondary">{{ $exp->category }}</span></td>
                                 <td>{{ $exp->paid_by ?? 'Company Fund' }}</td>
                                 <td class="text-end fw-bold text-danger">₹{{ number_format($exp->amount, 2) }}</td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center align-items-center gap-1">
+                                        <!-- Edit Expense Button -->
+                                        <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editExpenseModal_{{ $exp->id }}" title="Edit Expense">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <!-- Delete Expense Form -->
+                                        <form action="{{ route('investments.destroyExpense', $exp->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Delete Expense">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Edit Expense Modal -->
+                                    <div class="modal fade text-start" id="editExpenseModal_{{ $exp->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <form action="{{ route('investments.updateExpense', $exp->id) }}" method="POST" class="modal-content">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold"><i class="fas fa-edit text-danger me-2"></i> Edit Expense</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">Title / Description</label>
+                                                        <input type="text" name="title" class="form-control" value="{{ $exp->title }}" required>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-6">
+                                                            <label class="form-label fw-semibold">Category</label>
+                                                            <select name="category" class="form-select" required>
+                                                                <option value="Operations" {{ $exp->category == 'Operations' ? 'selected' : '' }}>Operations</option>
+                                                                <option value="Tech & Servers" {{ $exp->category == 'Tech & Servers' ? 'selected' : '' }}>Tech & Servers</option>
+                                                                <option value="Salaries" {{ $exp->category == 'Salaries' ? 'selected' : '' }}>Salaries</option>
+                                                                <option value="Marketing" {{ $exp->category == 'Marketing' ? 'selected' : '' }}>Marketing</option>
+                                                                <option value="Miscellaneous" {{ $exp->category == 'Miscellaneous' ? 'selected' : '' }}>Miscellaneous</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label fw-semibold">Amount (₹)</label>
+                                                            <input type="number" step="0.01" name="amount" class="form-control" value="{{ $exp->amount }}" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-6">
+                                                            <label class="form-label fw-semibold">Date</label>
+                                                            <input type="date" name="expense_date" class="form-control" value="{{ \Carbon\Carbon::parse($exp->expense_date)->format('Y-m-d') }}" required>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label fw-semibold">Paid By</label>
+                                                            <input type="text" name="paid_by" class="form-control" value="{{ $exp->paid_by }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger fw-semibold">Update Expense</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">No expenses recorded yet. Click "Log New Expense" to add.</td>
+                                <td colspan="6" class="text-center py-4 text-muted">No expenses recorded yet. Click "Log New Expense" to add.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -390,6 +457,7 @@
                             <tr>
                                 <td colspan="4" class="text-end text-uppercase">Total Operational Expenses:</td>
                                 <td class="text-end text-danger fs-5">₹{{ number_format($summary['total_expenses'], 2) }}</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
