@@ -23,6 +23,12 @@ class InvestmentController extends Controller
 
     public function index(Request $request)
     {
+        try {
+            $this->marketPriceService->updateAllPrices();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Live price sync on page load error: ' . $e->getMessage());
+        }
+
         $summary = $this->portfolioService->getDashboardSummary();
         return view('investments.index', compact('summary'));
     }
