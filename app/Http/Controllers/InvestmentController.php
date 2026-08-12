@@ -64,25 +64,79 @@ class InvestmentController extends Controller
             'symbol' => 'required|string|max:20',
             'name' => 'required|string|max:100',
             'asset_type' => 'required|in:stock_nse,crypto',
-            'quantity' => 'required|numeric|min:0.000001',
+            'quantity' => 'required|numeric|min:0',
             'buy_price' => 'required|numeric|min:0',
+            'sell_price' => 'nullable|numeric|min:0',
             'buy_sell_charges' => 'nullable|numeric|min:0',
             'api_identifier' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
         ]);
 
-        $charges = $validated['buy_sell_charges'] ?? 0;
-        $investmentAmount = ($validated['quantity'] * $validated['buy_price']) + $charges;
+        $validated['symbol'] = strtoupper(trim($validated['symbol']));
+        $charges = (float)($validated['buy_sell_charges'] ?? 0);
+        $quantity = (float)$validated['quantity'];
+        $buyPrice = (float)$validated['buy_price'];
+        $investmentAmount = ($quantity * $buyPrice) + $charges;
+
+        if (empty($validated['api_identifier'])) {
+            if ($validated['asset_type'] === 'stock_nse') {
+                $validated['api_identifier'] = str_contains($validated['symbol'], '.') ? $validated['symbol'] : "{$validated['symbol']}.NS";
+            } else {
+                $validated['api_identifier'] = strtolower($validated['symbol']);
+            }
+        }
 
         PortfolioAsset::create(array_merge($validated, [
             'investment_amount' => $investmentAmount,
             'buy_sell_charges' => $charges,
         ]));
 
-        // Sync prices after adding new asset
-        $this->marketPriceService->updateAllPrices();
+        try {
+            $this->marketPriceService->updateAllPrices();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Price sync after storeAsset error: ' . $e->getMessage());
+        }
 
-        return redirect()->route('investments.index')->with('success', 'New asset added to portfolio successfully!');
+        return redirect()->route('investments.index')->with('success', "Asset {$validated['symbol']} added to portfolio!");
+    }
+
+    /**
+     * Update existing stock or crypto holding.
+     */
+    public function updateAsset(Request $request, $id)
+    {
+        $asset = PortfolioAsset::findOrFail($id);
+
+        $validated = $request->validate([
+            'symbol' => 'required|string|max:20',
+            'name' => 'required|string|max:100',
+            'asset_type' => 'required|in:stock_nse,crypto',
+            'quantity' => 'required|numeric|min:0',
+            'buy_price' => 'required|numeric|min:0',
+            'sell_price' => 'nullable|numeric|min:0',
+            'buy_sell_charges' => 'nullable|numeric|min:0',
+            'api_identifier' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
+        ]);
+
+        $validated['symbol'] = strtoupper(trim($validated['symbol']));
+        $charges = (float)($validated['buy_sell_charges'] ?? 0);
+        $quantity = (float)$validated['quantity'];
+        $buyPrice = (float)$validated['buy_price'];
+        $investmentAmount = ($quantity * $buyPrice) + $charges;
+
+        $asset->update(array_merge($validated, [
+            'investment_amount' => $investmentAmount,
+            'buy_sell_charges' => $charges,
+        ]));
+
+        try {
+            $this->marketPriceService->updateAllPrices();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Price sync after updateAsset error: ' . $e->getMessage());
+        }
+
+        return redirect()->route('investments.index')->with('success', "Asset {$asset->symbol} updated successfully!");
     }
 
     /**
@@ -91,9 +145,14 @@ class InvestmentController extends Controller
     public function destroyAsset($id)
     {
         $asset = PortfolioAsset::findOrFail($id);
+        $symbol = $asset->symbol;
         $asset->delete();
 
-        return redirect()->route('investments.index')->with('success', 'Asset removed from portfolio.');
+        if (!PortfolioAsset::where('symbol', $symbol)->exists()) {
+            \App\Models\AssetPrice::where('symbol', $symbol)->delete();
+        }
+
+        return redirect()->route('investments.index')->with('success', "Asset {$symbol} removed from portfolio.");
     }
 
     /**

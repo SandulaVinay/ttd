@@ -210,11 +210,69 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <form action="{{ route('investments.destroyAsset', $asset['id']) }}" method="POST" onsubmit="return confirm('Delete this asset from holdings?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="fas fa-trash"></i></button>
-                                    </form>
+                                    <div class="d-flex justify-content-center align-items-center gap-1">
+                                        <!-- Edit Asset Button -->
+                                        <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editAssetModal_{{ $asset['id'] }}" title="Edit Asset">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <!-- Delete Asset Form -->
+                                        <form action="{{ route('investments.destroyAsset', $asset['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ $asset['symbol'] }}?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Delete Asset">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Edit Asset Modal -->
+                                    <div class="modal fade text-start" id="editAssetModal_{{ $asset['id'] }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <form action="{{ route('investments.updateAsset', $asset['id']) }}" method="POST" class="modal-content">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold"><i class="fas fa-edit text-primary me-2"></i> Edit {{ $asset['symbol'] }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">Asset Type</label>
+                                                        <select name="asset_type" class="form-select" required>
+                                                            <option value="stock_nse" {{ $asset['asset_type'] == 'stock_nse' ? 'selected' : '' }}>Indian Share Market (NSE Stock)</option>
+                                                            <option value="crypto" {{ $asset['asset_type'] == 'crypto' ? 'selected' : '' }}>Cryptocurrency</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">Ticker Symbol</label>
+                                                        <input type="text" name="symbol" class="form-control" value="{{ $asset['symbol'] }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">Asset Full Name</label>
+                                                        <input type="text" name="name" class="form-control" value="{{ $asset['name'] }}" required>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-6">
+                                                            <label class="form-label fw-semibold">Quantity</label>
+                                                            <input type="number" step="0.000001" name="quantity" class="form-control" value="{{ $asset['quantity'] }}" required>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label fw-semibold">Avg Buy Price (₹)</label>
+                                                            <input type="number" step="0.01" name="buy_price" class="form-control" value="{{ $asset['buy_price'] }}" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">Buy/Sell Charges (₹)</label>
+                                                        <input type="number" step="0.01" name="buy_sell_charges" class="form-control" value="{{ $asset['buy_sell_charges'] }}">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary fw-semibold">Update Asset</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

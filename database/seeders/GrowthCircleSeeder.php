@@ -135,19 +135,11 @@ class GrowthCircleSeeder extends Seeder
                 'api_identifier' => 'solana',
                 'initial_price' => 7250.623845,
             ],
-            [
-                'symbol' => 'SOUTHBANK',
-                'name' => 'South Indian Bank Ltd',
-                'asset_type' => 'stock_nse',
-                'quantity' => 70.0,
-                'buy_price' => 40.13,
-                'sell_price' => 40.39,
-                'buy_sell_charges' => 18.00,
-                'investment_amount' => 2827.10,
-                'api_identifier' => 'SOUTHBANK.NS',
-                'initial_price' => 40.39,
-            ],
         ];
+
+        // Remove sold assets like SOUTHBANK from active holdings
+        PortfolioAsset::where('symbol', 'SOUTHBANK')->delete();
+        AssetPrice::where('symbol', 'SOUTHBANK')->delete();
 
         foreach ($assets as $assetData) {
             $initialPrice = $assetData['initial_price'];

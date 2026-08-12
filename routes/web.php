@@ -40,6 +40,7 @@ Route::middleware(['auth', 'role:Super Admin|Operator'])->group(function () {
     Route::get('investments', [App\Http\Controllers\InvestmentController::class, 'index'])->name('investments.index');
     Route::post('investments/sync-live-prices', [App\Http\Controllers\InvestmentController::class, 'syncLivePrices'])->name('investments.syncLivePrices');
     Route::post('investments/assets', [App\Http\Controllers\InvestmentController::class, 'storeAsset'])->name('investments.storeAsset');
+    Route::put('investments/assets/{id}', [App\Http\Controllers\InvestmentController::class, 'updateAsset'])->name('investments.updateAsset');
     Route::delete('investments/assets/{id}', [App\Http\Controllers\InvestmentController::class, 'destroyAsset'])->name('investments.destroyAsset');
     Route::post('investments/expenses', [App\Http\Controllers\InvestmentController::class, 'storeExpense'])->name('investments.storeExpense');
     Route::post('investments/contributions', [App\Http\Controllers\InvestmentController::class, 'updateContribution'])->name('investments.updateContribution');
