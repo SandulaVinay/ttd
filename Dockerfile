@@ -28,10 +28,11 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     libsqlite3-dev \
+    libpq-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql pdo_sqlite mbstring exif pcntl bcmath gd
 
 # Copy Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

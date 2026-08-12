@@ -36,7 +36,15 @@ Route::middleware(['auth', 'role:Super Admin|Operator'])->group(function () {
     
     Route::patch('bookings/{booking}/status', [App\Http\Controllers\BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
     Route::resource('bookings', App\Http\Controllers\BookingController::class);
-    Route::resource('investments', App\Http\Controllers\InvestmentController::class);
+    // Growth Circle Investment & Real-Time Portfolio Tracker Routes
+    Route::get('investments', [App\Http\Controllers\InvestmentController::class, 'index'])->name('investments.index');
+    Route::post('investments/sync-live-prices', [App\Http\Controllers\InvestmentController::class, 'syncLivePrices'])->name('investments.syncLivePrices');
+    Route::post('investments/assets', [App\Http\Controllers\InvestmentController::class, 'storeAsset'])->name('investments.storeAsset');
+    Route::delete('investments/assets/{id}', [App\Http\Controllers\InvestmentController::class, 'destroyAsset'])->name('investments.destroyAsset');
+    Route::post('investments/expenses', [App\Http\Controllers\InvestmentController::class, 'storeExpense'])->name('investments.storeExpense');
+    Route::post('investments/contributions', [App\Http\Controllers\InvestmentController::class, 'updateContribution'])->name('investments.updateContribution');
+    Route::post('investments/cash-fund', [App\Http\Controllers\InvestmentController::class, 'updateCashFund'])->name('investments.updateCashFund');
+
     
     Route::get('revenues/export', [App\Http\Controllers\RevenueController::class, 'export'])->name('revenues.export');
     Route::resource('revenues', App\Http\Controllers\RevenueController::class);

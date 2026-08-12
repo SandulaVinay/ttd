@@ -2,62 +2,153 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\InvestmentService;
-use App\Http\Requests\StoreInvestmentRequest;
-use Yajra\DataTables\Facades\DataTables;
+use App\Models\CompanyExpense;
+use App\Models\FundBalance;
+use App\Models\InvestorContribution;
+use App\Models\PortfolioAsset;
+use App\Services\MarketPriceService;
+use App\Services\PortfolioService;
 use Illuminate\Http\Request;
-use App\Models\Investment;
 
 class InvestmentController extends Controller
 {
-    protected InvestmentService $investmentService;
+    protected PortfolioService $portfolioService;
+    protected MarketPriceService $marketPriceService;
 
-    public function __construct(InvestmentService $investmentService)
+    public function __construct(PortfolioService $portfolioService, MarketPriceService $marketPriceService)
     {
-        $this->investmentService = $investmentService;
+        $this->portfolioService = $portfolioService;
+        $this->marketPriceService = $marketPriceService;
     }
 
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            $data = $this->investmentService->getGroupedInvestments();
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('total_amount_formatted', function($row){
-                    return '₹' . number_format($row->total_amount, 2);
-                })
-                ->addColumn('action', function($row){
-                    $btn = '<a href="'.route('investments.show', ['investment' => urlencode($row->investor_name)]).'" class="btn btn-sm btn-primary" style="background:var(--temple-gold); border:none;"><i class="fas fa-eye"></i> View</a>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+        $summary = $this->portfolioService->getDashboardSummary();
+        return view('investments.index', compact('summary'));
+    }
+
+    /**
+     * AJAX Endpoint to fetch live stock & crypto prices.
+     */
+    public function syncLivePrices()
+    {
+        try {
+            $updatedPrices = $this->marketPriceService->updateAllPrices();
+            $summary = $this->portfolioService->getDashboardSummary();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Live market prices synced successfully!',
+                'summary' => $summary,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch live prices: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return view('investments.index');
     }
 
-    public function show($investorName)
+    /**
+     * Add new stock or crypto holding.
+     */
+    public function storeAsset(Request $request)
     {
-        $investorName = urldecode($investorName);
-        $investments = $this->investmentService->getInvestmentsByInvestor($investorName);
-        return view('investments.show', compact('investments', 'investorName'));
+        $validated = $request->validate([
+            'symbol' => 'required|string|max:20',
+            'name' => 'required|string|max:100',
+            'asset_type' => 'required|in:stock_nse,crypto',
+            'quantity' => 'required|numeric|min:0.000001',
+            'buy_price' => 'required|numeric|min:0',
+            'buy_sell_charges' => 'nullable|numeric|min:0',
+            'api_identifier' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
+        ]);
+
+        $charges = $validated['buy_sell_charges'] ?? 0;
+        $investmentAmount = ($validated['quantity'] * $validated['buy_price']) + $charges;
+
+        PortfolioAsset::create(array_merge($validated, [
+            'investment_amount' => $investmentAmount,
+            'buy_sell_charges' => $charges,
+        ]));
+
+        // Sync prices after adding new asset
+        $this->marketPriceService->updateAllPrices();
+
+        return redirect()->route('investments.index')->with('success', 'New asset added to portfolio successfully!');
     }
 
-    public function create()
+    /**
+     * Delete an asset holding.
+     */
+    public function destroyAsset($id)
     {
-        return view('investments.create');
+        $asset = PortfolioAsset::findOrFail($id);
+        $asset->delete();
+
+        return redirect()->route('investments.index')->with('success', 'Asset removed from portfolio.');
     }
 
-    public function store(StoreInvestmentRequest $request)
+    /**
+     * Add a real-time company expense.
+     */
+    public function storeExpense(Request $request)
     {
-        $this->investmentService->createInvestment($request->validated());
-        return redirect()->route('investments.index')->with('success', 'Investment added successfully.');
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'paid_by' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
+        ]);
+
+        CompanyExpense::create($validated);
+
+        return redirect()->route('investments.index')->with('success', 'Company expense recorded successfully!');
     }
 
-    public function destroy($id)
+    /**
+     * Save/Update partner monthly contribution.
+     */
+    public function updateContribution(Request $request)
     {
-        $this->investmentService->deleteInvestment($id);
-        return redirect()->route('investments.index')->with('success', 'Investment removed successfully.');
+        $validated = $request->validate([
+            'investor_id' => 'required|exists:investors,id',
+            'month' => 'required|string',
+            'year' => 'required|integer',
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        InvestorContribution::updateOrCreate(
+            [
+                'investor_id' => $validated['investor_id'],
+                'month' => $validated['month'],
+                'year' => $validated['year'],
+            ],
+            [
+                'amount' => $validated['amount'],
+            ]
+        );
+
+        return redirect()->route('investments.index')->with('success', 'Partner contribution updated successfully!');
+    }
+
+    /**
+     * Update available cash fund balance.
+     */
+    public function updateCashFund(Request $request)
+    {
+        $validated = $request->validate([
+            'available_cash' => 'required|numeric|min:0',
+        ]);
+
+        FundBalance::updateOrCreate(
+            ['id' => 1],
+            ['available_cash' => $validated['available_cash']]
+        );
+
+        return redirect()->route('investments.index')->with('success', 'Available cash fund updated successfully!');
     }
 }
