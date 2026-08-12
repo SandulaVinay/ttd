@@ -76,7 +76,21 @@ class PortfolioService
         // Investor partner contribution totals
         $investors = Investor::with('contributions')->get();
         $investorContributions = [];
-        $months = ['November 2025', 'December 2025', 'January', 'February', 'March', 'April', 'May'];
+        
+        $dbMonths = InvestorContribution::select('month')->distinct()->pluck('month')->toArray();
+        $defaultMonths = [
+            'November 2024',
+            'December 2024',
+            'January 2025',
+            'February 2025',
+            'March 2025',
+            'April 2025',
+            'May 2025',
+            'June 2025',
+            'July 2025',
+            'August 2025'
+        ];
+        $months = !empty($dbMonths) ? array_unique(array_merge($defaultMonths, $dbMonths)) : $defaultMonths;
 
         foreach ($investors as $investor) {
             $contributionsByMonth = $investor->contributions->keyBy('month');

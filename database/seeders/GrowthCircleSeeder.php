@@ -13,10 +13,10 @@ class GrowthCircleSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Available Cash Fund Balance
+        // 1. Create Available Cash Fund Balance (From P&L Sheet: ₹106,557.33)
         FundBalance::updateOrCreate(
             ['id' => 1],
-            ['available_cash' => 66557.00, 'notes' => 'Available liquid fund balance']
+            ['available_cash' => 106557.33, 'notes' => 'Available liquid fund balance from P&L Sheet']
         );
 
         // 2. Create Investors / Partners
@@ -37,28 +37,35 @@ class GrowthCircleSeeder extends Seeder
             );
         }
 
-        // 3. Monthly Contributions Grid (from Excel)
+        // 3. Monthly Contributions Grid (From Sheet 1: Investment - Nov 2024 to Aug 2025)
         $contributionsData = [
-            'November 2025' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 4850],
-            'December 2025' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 12700],
-            'January'       => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 3800],
-            'February'      => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 1950],
-            'March'         => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6850],
-            'April'         => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 8900],
-            'May'           => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6500],
+            'November 2024' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 4850],
+            'December 2024' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 12700],
+            'January 2025'  => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 3800],
+            'February 2025' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 1950],
+            'March 2025'    => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6850],
+            'April 2025'    => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 8900],
+            'May 2025'      => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 10000],
+            'June 2025'     => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6500],
+            'July 2025'     => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 0],
+            'August 2025'   => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 0],
         ];
 
         foreach ($contributionsData as $month => $partnerAmounts) {
+            $parts = explode(' ', $month);
+            $monthName = $parts[0];
+            $year = isset($parts[1]) ? (int)$parts[1] : 2025;
+
             foreach ($partnerAmounts as $name => $amount) {
                 if (isset($investorModels[$name])) {
                     InvestorContribution::updateOrCreate(
                         [
                             'investor_id' => $investorModels[$name]->id,
                             'month'       => $month,
-                            'year'        => 2025,
                         ],
                         [
-                            'amount' => $amount,
+                            'year'        => $year,
+                            'amount'      => $amount,
                         ]
                     );
                 }
@@ -71,51 +78,51 @@ class GrowthCircleSeeder extends Seeder
             $model->update(['total_contributed' => $total]);
         }
 
-        // 4. Create Stock & Crypto Assets from Excel
+        // 4. Create Stock & Crypto Assets from Sheet 2 (Assets) & Sheet 4 (Formulas)
         $assets = [
             [
                 'symbol' => 'DOGE',
                 'name' => 'Dogecoin',
                 'asset_type' => 'crypto',
-                'quantity' => 179,
-                'buy_price' => 13.78,
+                'quantity' => 179.3412,
+                'buy_price' => 13.7777,
                 'buy_sell_charges' => 26.24,
-                'investment_amount' => 2500,
+                'investment_amount' => 2500.15,
                 'api_identifier' => 'dogecoin',
-                'initial_price' => 6.84,
+                'initial_price' => 6.832703955,
             ],
             [
                 'symbol' => 'TATAPOWER',
                 'name' => 'Tata Power Co Ltd',
                 'asset_type' => 'stock_nse',
-                'quantity' => 5,
+                'quantity' => 5.0,
                 'buy_price' => 377.25,
-                'buy_sell_charges' => 0,
-                'investment_amount' => 1889,
+                'buy_sell_charges' => 3.00,
+                'investment_amount' => 1889.25,
                 'api_identifier' => 'TATAPOWER.NS',
-                'initial_price' => 375.15,
+                'initial_price' => 374.85,
             ],
             [
                 'symbol' => 'ADANIGREEN',
                 'name' => 'Adani Green Energy Ltd',
                 'asset_type' => 'stock_nse',
-                'quantity' => 3,
+                'quantity' => 3.0,
                 'buy_price' => 1008.00,
-                'buy_sell_charges' => 0,
-                'investment_amount' => 3027,
+                'buy_sell_charges' => 3.00,
+                'investment_amount' => 3027.00,
                 'api_identifier' => 'ADANIGREEN.NS',
-                'initial_price' => 1320.70,
+                'initial_price' => 1322.60,
             ],
             [
                 'symbol' => 'VET',
                 'name' => 'VeChain (VET)',
                 'asset_type' => 'crypto',
-                'quantity' => 34312,
+                'quantity' => 34311.6979,
                 'buy_price' => 0.96,
-                'buy_sell_charges' => 386.00,
-                'investment_amount' => 33328,
+                'buy_sell_charges' => 385.77,
+                'investment_amount' => 33328.00,
                 'api_identifier' => 'vechain',
-                'initial_price' => 0.44,
+                'initial_price' => 0.4418691805,
             ],
             [
                 'symbol' => 'SOL',
@@ -124,21 +131,21 @@ class GrowthCircleSeeder extends Seeder
                 'quantity' => 0.99,
                 'buy_price' => 8123.99,
                 'buy_sell_charges' => 124.28,
-                'investment_amount' => 8248,
+                'investment_amount' => 8248.27,
                 'api_identifier' => 'solana',
-                'initial_price' => 7268.91,
+                'initial_price' => 7250.623845,
             ],
             [
                 'symbol' => 'SOUTHBANK',
                 'name' => 'South Indian Bank Ltd',
                 'asset_type' => 'stock_nse',
-                'quantity' => 70,
+                'quantity' => 70.0,
                 'buy_price' => 40.13,
                 'sell_price' => 40.39,
                 'buy_sell_charges' => 18.00,
-                'investment_amount' => 2827,
+                'investment_amount' => 2827.10,
                 'api_identifier' => 'SOUTHBANK.NS',
-                'initial_price' => 46.27,
+                'initial_price' => 40.39,
             ],
         ];
 
