@@ -37,18 +37,21 @@ class GrowthCircleSeeder extends Seeder
             );
         }
 
-        // 3. Monthly Contributions Grid (From Sheet 1: Investment - Nov 2024 to Aug 2025)
+        // Clean up any old 2024 contribution entries
+        InvestorContribution::where('month', 'LIKE', '%2024%')->orWhere('month', 'LIKE', '%2025')->delete();
+
+        // 3. Monthly Contributions Grid (Investment started Nov 2025, running in 2026)
         $contributionsData = [
-            'November 2024' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 4850],
-            'December 2024' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 12700],
-            'January 2025'  => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 3800],
-            'February 2025' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 1950],
-            'March 2025'    => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6850],
-            'April 2025'    => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 8900],
-            'May 2025'      => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 10000],
-            'June 2025'     => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6500],
-            'July 2025'     => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 0],
-            'August 2025'   => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 0],
+            'November 2025' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 4850],
+            'December 2025' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 12700],
+            'January 2026'  => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 3800],
+            'February 2026' => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 1950],
+            'March 2026'    => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6850],
+            'April 2026'    => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 8900],
+            'May 2026'      => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 10000],
+            'June 2026'     => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 6500],
+            'July 2026'     => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 0],
+            'August 2026'   => ['Balaji' => 2000, 'Nikhil' => 2000, 'Vinay' => 2000, 'Tharun' => 2000, 'Gowtham' => 2000, 'Business' => 0],
         ];
 
         foreach ($contributionsData as $month => $partnerAmounts) {

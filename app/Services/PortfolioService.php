@@ -79,16 +79,16 @@ class PortfolioService
         
         $dbMonths = InvestorContribution::select('month')->distinct()->pluck('month')->toArray();
         $defaultMonths = [
-            'November 2024',
-            'December 2024',
-            'January 2025',
-            'February 2025',
-            'March 2025',
-            'April 2025',
-            'May 2025',
-            'June 2025',
-            'July 2025',
-            'August 2025'
+            'November 2025',
+            'December 2025',
+            'January 2026',
+            'February 2026',
+            'March 2026',
+            'April 2026',
+            'May 2026',
+            'June 2026',
+            'July 2026',
+            'August 2026'
         ];
         $months = !empty($dbMonths) ? array_unique(array_merge($defaultMonths, $dbMonths)) : $defaultMonths;
 
